@@ -1,0 +1,19 @@
+model:
+  clip_model: "ViT-B/32"
+  device: "mps" #"cuda" # or "cpu"
+
+preprocessing:
+  image_size: 224
+  center_crop: true
+  normalize: true
+  mean: [0.48145466, 0.4578275, 0.40821073]
+  std: [0.26862954, 0.26130258, 0.27577711]
+
+search:
+  index_type: "IndexFlatIP"  # Inner product similarity
+  dimension: 512  # CLIP ViT-B/32 embedding dimension
+  nprobe: 8  # Number of clusters to visit during search
+
+app:
+  title: "Visual Product Search"
+  description: "Find similar products using image search"

@@ -1,0 +1,14 @@
+__pycache__
+*.pyc
+.DS_Store
+
+# data
+data/evaluation/*
+data/images/*
+data/index/*
+!data/evaluation/.gitkeep
+!data/images/.gitkeep
+!data/index/.gitkeep
+
+# tmp
+notebooks/
