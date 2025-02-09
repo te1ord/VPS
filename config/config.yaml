@@ -3,7 +3,7 @@ model:
   device: "mps" #"cuda" # or "cpu"
 
 preprocessing:
-  image_size: 224
+  image_size: [224, 224]
   center_crop: true
   normalize: true
   mean: [0.48145466, 0.4578275, 0.40821073]

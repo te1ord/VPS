@@ -40,13 +40,16 @@ class FAISSSearcher:
         self.index.add(features)
         self.image_paths.extend(image_paths)
     
-    def search(self, query_features: torch.Tensor, k: int = None) -> Tuple[np.ndarray, np.ndarray]:
+    def search(self, query_features: torch.Tensor, k: int = None, text_features: torch.Tensor = None, 
+             visual_weight: float = 0.5) -> Tuple[np.ndarray, np.ndarray]:
         """
-        Search for similar images.
+        Search for similar images using visual and/or text features.
         
         Args:
-            query_features: Query feature tensor of shape (1, dimension)
+            query_features: Visual query feature tensor of shape (1, dimension)
             k: Number of results to return (default: from config)
+            text_features: Optional text query feature tensor of shape (1, dimension)
+            visual_weight: Weight for visual features (1 - visual_weight will be used for text)
         
         Returns:
             distances: Array of similarity scores
@@ -61,6 +64,19 @@ class FAISSSearcher:
         # Ensure query features are 2D
         if len(query_features.shape) == 1:
             query_features = query_features.reshape(1, -1)
+            
+        # If text features are provided, combine them with visual features
+        if text_features is not None:
+            if isinstance(text_features, torch.Tensor):
+                text_features = text_features.cpu().numpy()
+            if len(text_features.shape) == 1:
+                text_features = text_features.reshape(1, -1)
+                
+            # Combine features with weighting
+            combined_features = visual_weight * query_features + (1 - visual_weight) * text_features
+            # Normalize combined features
+            combined_features = combined_features / np.linalg.norm(combined_features, axis=1, keepdims=True)
+            query_features = combined_features
         
         distances, indices = self.index.search(query_features, k)
         return distances, indices

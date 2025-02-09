@@ -1,0 +1,99 @@
+# Product categories and attributes for zero-shot image tagging
+product_attributes:
+  # Clothing types
+  - dress
+  - t-shirt
+  - jeans
+  - shoes
+  - sneakers
+  - boots
+  - jacket
+  - coat
+  - sweater
+  - skirt
+  - pants
+  - shorts
+
+  # Styles
+  - formal
+  - casual
+  - sporty
+  - elegant
+  - vintage
+  - modern
+
+  # Colors
+  - black
+  - white
+  - red
+  - blue
+  - green
+  - yellow
+  - pink
+  - purple
+
+  # Materials
+  - leather
+  - cotton
+  - denim
+  - silk
+  - wool
+  - synthetic
+
+  # Patterns
+  - floral
+  - striped
+  - plain
+  - patterned
+  - checkered
+
+  # Seasons
+  - summer
+  - winter
+  - spring
+  - autumn
+
+  # Gender
+  - men's
+  - women's
+  - unisex
+
+  # Accessories and others
+  - accessories
+  - bag
+  - watch
+  - jewelry
+  - sunglasses
+
+  # Occasions
+  - athletic
+  - business
+  - party
+  - everyday 
+
+
+  # some amazon categories
+  - Beauty and personal care
+  - Electronics
+  - Jewelry
+  - Appliances
+  - Automotive
+  - Home and kitchen
+  - Books
+  - Pet supplies
+  - Toys and games
+  - Baby
+  - Fine art 
+  - Mobile phones
+  - Office products
+  - Sports and Outdoors
+  - Camera accessories
+  - Grocery and gourmet food
+  - Health, household & baby care
+  - Home & garden
+  - Tools and home improvement
+  - Arts, crafts and sewing
+  - Cds & Vinyl
+  - Digital music
+  - Garden and outdoor
+  - Video games
