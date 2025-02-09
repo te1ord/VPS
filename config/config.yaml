@@ -17,3 +17,29 @@ search:
 app:
   title: "Visual Product Search"
   description: "Find similar products using image search"
+
+detection:
+  model_path: "yolov8n-oiv7.pt"
+  confidence_threshold: 0.1
+  nms_iou_threshold: 0.5  # IoU threshold for non-max suppression
+  # Classes to exclude (these will never be included in results)
+  exclude_classes: [
+    "Face",
+    "Human face",
+    "Head",
+    "Human head",
+    "Human body",
+    "Human arm",
+    "Human hand",
+    "Human leg",
+    "Human foot",
+    "Human eye",
+    "Human nose",
+    "Human mouth",
+    "Human ear",
+    "Human hair"
+  ]
+  # Optional: List of classes to include (if empty, all non-excluded classes are included)
+  include_classes: []
+
+
