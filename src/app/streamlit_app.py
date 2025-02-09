@@ -130,7 +130,7 @@ def main():
             
             # Generate automatic text query if enabled and no user query provided
             if use_auto_tagging and not text_query:
-                auto_text_query = feature_extractor.generate_text_query(image_tensor)
+                auto_text_query, query_embedding = feature_extractor.generate_text_query(image_tensor)
                 tags, scores = feature_extractor.get_image_tags(image_tensor)
                 
                 # Display detected tags with confidence scores
@@ -142,8 +142,8 @@ def main():
                     st.markdown("### 🤖 Generated Query")
                     st.info(f'"{auto_text_query}"')
                     
-                    # Use the generated query for text features
-                    text_features = feature_extractor.extract_text_features(auto_text_query)
+                    # Use the pre-computed query embedding
+                    text_features = query_embedding
                 else:
                     st.warning("No confident tags detected. Using pure visual search.")
                     text_features = None
