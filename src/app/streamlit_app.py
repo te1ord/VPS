@@ -167,15 +167,25 @@ def main():
                          (text_query or (use_auto_tagging and not text_query)))
     
     if show_weight_slider:
-        visual_weight = st.slider(
-            "Visual-Text Weight Balance",
-            min_value=0.0,
-            max_value=1.0,
-            value=0.7 if use_auto_tagging else 0.5,
-            help="0 = Text only, 1 = Image only"
-        )
+        col1, col2 = st.columns(2)
+        with col1:
+            visual_weight = st.slider(
+                "Visual-Text Weight Balance",
+                min_value=0.0,
+                max_value=1.0,
+                value=0.7 if use_auto_tagging else 0.5,
+                help="0 = Text only, 1 = Image only"
+            )
+        with col2:
+            merge_strategy = st.selectbox(
+                "Merging Strategy",
+                options=["embedding", "score"],
+                help=("'embedding': Combine features before search\n"
+                     "'score': Separate searches with score combination")
+            )
     else:
         visual_weight = 0.7 if use_auto_tagging else 0.5  # Default weights
+        merge_strategy = "embedding"  # Default strategy
     
     # Add control for number of similar products
     num_results = st.slider("Number of similar products to show", min_value=1, max_value=20, value=6)
@@ -249,7 +259,8 @@ def main():
                             region_features,
                             k=50,
                             text_features=text_features,
-                            visual_weight=region_visual_weight
+                            visual_weight=region_visual_weight,
+                            merge_strategy=merge_strategy
                         )
                         region_scores.append((distances[0], indices[0], detection))
                     

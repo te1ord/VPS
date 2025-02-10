@@ -84,7 +84,7 @@ class FAISSSearcher:
         self.add_items(features, items)
     
     def search(self, query_features: torch.Tensor, k: int = None, text_features: Optional[torch.Tensor] = None, 
-             visual_weight: float = 0.5) -> Tuple[np.ndarray, np.ndarray]:
+             visual_weight: float = 0.5, merge_strategy: str = "embedding") -> Tuple[np.ndarray, np.ndarray]:
         """
         Search for similar items using visual and/or text features.
         
@@ -93,6 +93,9 @@ class FAISSSearcher:
             k: Number of results to return (default: from config)
             text_features: Optional text query feature tensor of shape (1, dimension)
             visual_weight: Weight for visual features (1 - visual_weight will be used for text)
+            merge_strategy: How to combine visual and text features:
+                - "embedding": Combine feature embeddings before search (original approach)
+                - "score": Perform separate searches and merge scores
         
         Returns:
             distances: Array of similarity scores
@@ -108,21 +111,84 @@ class FAISSSearcher:
         if len(query_features.shape) == 1:
             query_features = query_features.reshape(1, -1)
             
-        # If text features are provided, combine them with visual features
-        if text_features is not None:
-            if isinstance(text_features, torch.Tensor):
-                text_features = text_features.cpu().numpy()
-            if len(text_features.shape) == 1:
-                text_features = text_features.reshape(1, -1)
-                
-            # Combine features with weighting
+        # If no text features, perform visual-only search
+        if text_features is None:
+            distances, indices = self.index.search(query_features, k)
+            return distances, indices
+        
+        # Convert text features to numpy if needed
+        if isinstance(text_features, torch.Tensor):
+            text_features = text_features.cpu().numpy()
+        if len(text_features.shape) == 1:
+            text_features = text_features.reshape(1, -1)
+        
+        if merge_strategy == "embedding":
+            # Original approach: combine embeddings before search
             combined_features = visual_weight * query_features + (1 - visual_weight) * text_features
             # Normalize combined features
             combined_features = combined_features / np.linalg.norm(combined_features, axis=1, keepdims=True)
-            query_features = combined_features
+            distances, indices = self.index.search(combined_features, k)
+            return distances, indices
         
-        distances, indices = self.index.search(query_features, k)
-        return distances, indices
+        elif merge_strategy == "score":
+            # New approach: separate searches and merge scores
+            # Get more results initially for better merging
+            search_k = min(k * 3, len(self.metadata))  # Get 3x results but don't exceed dataset size
+            
+            # Perform visual search
+            visual_distances, visual_indices = self.index.search(query_features, search_k)
+            
+            # Perform text search
+            text_distances, text_indices = self.index.search(text_features, search_k)
+            
+            # Combine results using weighted scores
+            combined_scores = {}
+            
+            # Process visual results
+            for distances, indices in zip(visual_distances, visual_indices):
+                for d, idx in zip(distances, indices):
+                    if idx not in combined_scores:
+                        combined_scores[idx] = {"visual": d, "text": None}
+                    else:
+                        combined_scores[idx]["visual"] = d
+            
+            # Process text results
+            for distances, indices in zip(text_distances, text_indices):
+                for d, idx in zip(distances, indices):
+                    if idx not in combined_scores:
+                        combined_scores[idx] = {"visual": None, "text": d}
+                    else:
+                        combined_scores[idx]["text"] = d
+            
+            # Calculate final scores
+            final_scores = []
+            for idx, scores in combined_scores.items():
+                visual_score = scores["visual"] if scores["visual"] is not None else -1
+                text_score = scores["text"] if scores["text"] is not None else -1
+                
+                if visual_score == -1 and text_score == -1:
+                    continue
+                elif visual_score == -1:
+                    final_score = text_score * (1 - visual_weight)
+                elif text_score == -1:
+                    final_score = visual_score * visual_weight
+                else:
+                    final_score = visual_score * visual_weight + text_score * (1 - visual_weight)
+                
+                final_scores.append((idx, final_score))
+            
+            # Sort by final score and get top k
+            final_scores.sort(key=lambda x: x[1], reverse=True)
+            top_k = final_scores[:k]
+            
+            # Convert to numpy arrays
+            indices = np.array([[idx for idx, _ in top_k]])
+            distances = np.array([[score for _, score in top_k]])
+            
+            return distances, indices
+        
+        else:
+            raise ValueError(f"Unknown merge strategy: {merge_strategy}. Use 'embedding' or 'score'.")
     
     def get_metadata(self, indices: np.ndarray) -> List[IndexItem]:
         """Get metadata for given indices."""
