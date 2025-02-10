@@ -8,14 +8,16 @@ import os
 import json
 import numpy as np
 from collections import defaultdict
+from typing import List, Tuple, Optional
 
 # Add src to Python path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 
 from src.preprocessing.image_processor import ImageProcessor
 from src.feature_extraction.clip_extractor import CLIPExtractor
-from src.search.faiss_index import FAISSSearcher
+from src.search.faiss_index import FAISSSearcher, IndexItem
 from src.preprocessing.object_detector import ObjectDetector
+from src.utils.image_utils import compute_iou, crop_image, non_max_suppression
 
 # Load configuration
 with open("config/config.yaml", 'r') as f:
@@ -48,89 +50,200 @@ def load_and_process_image(image_data):
         return Image.open(image_data).convert('RGB')
     return None
 
-def crop_image(image: Image.Image, bbox: tuple) -> Image.Image:
-    """Crop image to bounding box."""
-    x1, y1, x2, y2 = map(int, bbox)
-    return image.crop((x1, y1, x2, y2))
 
-def process_regions(image, preprocessor, feature_extractor, detector):
-    """Process image and extract features for full image and detected regions."""
-    features_list = []
-    detections_list = []
+def process_search_results(distances: np.ndarray, indices: np.ndarray, searcher: FAISSSearcher) -> List[Tuple[str, List[Tuple[IndexItem, float]]]]:
+    """
+    Process search results: group by original image, filter regions, and sort by best score.
     
-    # First, process full image
-    full_image_tensor = preprocessor.preprocess(image).unsqueeze(0)
-    full_image_features = feature_extractor.extract_features(full_image_tensor)
+    Args:
+        distances: Similarity scores from FAISS search
+        indices: Indices from FAISS search
+        searcher: FAISSSearcher instance
     
-    # Add full image
-    w, h = image.size
-    features_list.append(full_image_features)
-    detections_list.append({
-        'bbox': (0, 0, w, h),
-        'class_name': 'full_image',
-        'confidence': 1.0,
-        'is_full_image': True
-    })
+    Returns:
+        List of (image_path, [(item, score)]) tuples, sorted by best score
+    """
+    # Define classes to filter out
+    FILTERED_CLASSES = {'man', 'woman', 'person', 'boy', 'girl'}
     
-    # Detect and process objects
-    object_detections = detector.detect_objects(image)
+    # Get metadata for all results
+    metadata_items = searcher.get_metadata(indices)
     
-    # Process each detection
-    for detection in object_detections:
-        if detection.class_name == "whole_image":
-            continue
-        
-        # Process cropped image
-        image_tensor = preprocessor.preprocess(detection.cropped_image).unsqueeze(0)
-        features = feature_extractor.extract_features(image_tensor)
-        
-        features_list.append(features)
-        detections_list.append({
-            'bbox': detection.bbox,
-            'class_name': detection.class_name,
-            'confidence': detection.confidence,
-            'is_full_image': False
-        })
-    
-    return torch.cat(features_list, dim=0), detections_list
-
-def display_results(results, num_results):
-    """Display search results grouped by original images."""
     # Group results by original image
     image_results = defaultdict(list)
-    for item, score in results:
+    for item, score in zip(metadata_items, distances[0]):
         image_results[item.original_image_path].append((item, score))
     
-    # Sort images by their best matching region's score
-    sorted_images = sorted(
-        image_results.items(),
-        key=lambda x: max(score for _, score in x[1]),
-        reverse=True
-    )[:num_results]
+    # Process each image's results
+    final_results = []
+    for img_path, items in image_results.items():
+        # Load image once for area calculations
+        image = Image.open(img_path).convert('RGB')
+        w, h = image.size
+        image_area = w * h
+        
+        # Filter and process items for this image
+        valid_items = []
+        for item, score in items:
+            if item.is_full_image:
+                # Always keep full images
+                valid_items.append((item, score))
+            else:
+                # Skip human-related detections
+                if item.class_name.lower() in FILTERED_CLASSES:
+                    continue
+                    
+                # Calculate region area percentage
+                bbox = item.bbox
+                region_area = (bbox[2] - bbox[0]) * (bbox[3] - bbox[1])
+                area_ratio = region_area / image_area
+                
+                # Only keep regions larger than 50% of the image
+                if area_ratio >= config['detection']['min_region_size']:
+                    valid_items.append((item, score))
+        
+        if valid_items:  # Only add images that have valid results
+            final_results.append((img_path, valid_items))
+    
+    # Sort by best score of any valid item for each image
+    final_results.sort(key=lambda x: max(score for _, score in x[1]), reverse=True)
+    return final_results
+
+def display_results(processed_results: List[Tuple[str, List[Tuple[IndexItem, float]]]], num_results: int):
+    """Display search results grouped by original images."""
+    # Take only the requested number of results
+    results_to_show = processed_results[:num_results]
     
     # Display results in a grid
     cols = st.columns(3)
     
-    for idx, (img_path, detections) in enumerate(sorted_images):
-        # Sort detections by score
-        detections = sorted(detections, key=lambda x: x[1], reverse=True)
-        best_detection = detections[0]
+    for idx, (img_path, items) in enumerate(results_to_show):
+        # Sort items by score
+        items = sorted(items, key=lambda x: x[1], reverse=True)
+        best_item = items[0]
         
         with cols[idx % 3]:
-            # Load original image
+            # Load and display original image
             image = Image.open(img_path).convert('RGB')
-            
-            # Display original image
-            st.image(image, caption=f"Match Score: {best_detection[1]:.3f}", use_container_width=True)
+            st.image(image, caption=f"Match Score: {best_item[1]:.3f}", use_container_width=True)
             
             # Add expander for detected regions if there are any non-full-image detections
-            sub_regions = [(det, score) for det, score in detections if not det.is_full_image]
-            if sub_regions:
+            region_items = [(item, score) for item, score in items if not item.is_full_image]
+            if region_items:
                 with st.expander("View Detected Regions"):
-                    for det, score in sub_regions:
-                        st.markdown(f"##### {det.class_name} (Score: {score:.3f})")
-                        region = crop_image(image, det.bbox)
+                    for item, score in region_items:
+                        st.markdown(f"##### {item.class_name} (Score: {score:.3f})")
+                        region = crop_image(image, item.bbox, preserve_aspect_ratio=False)
                         st.image(region, use_container_width=True)
+
+def display_image_with_detections(image: Image.Image, detector: ObjectDetector) -> Optional[tuple]:
+    """
+    Display image with detected regions and allow selection.
+    Returns the selected region's bbox or None if whole image is selected.
+    """
+    # Detect objects
+    detections = detector.detect_objects(image)
+    
+    # Filter out human-related classes and small regions
+    FILTERED_CLASSES = {'man', 'woman', 'person', 'boy', 'girl'}
+    w, h = image.size
+    image_area = w * h
+    valid_detections = []
+    
+    for det in detections:
+        if det.class_name.lower() in FILTERED_CLASSES:
+            continue
+        
+        # Calculate region area percentage
+        bbox = det.bbox
+        region_area = (bbox[2] - bbox[0]) * (bbox[3] - bbox[1])
+        area_ratio = region_area / image_area
+        
+        if area_ratio >= config['detection']['min_region_size']:
+            valid_detections.append(det)
+    
+    # Apply NMS across all classes
+    valid_detections = non_max_suppression(valid_detections, iou_threshold=config['detection']['nms_iou_threshold_ui'], cross_class_suppression=True)
+    
+    if not valid_detections:
+        return None
+    
+    # Create options list
+    options = ["Whole Image"] + [f"{det.class_name} (Confidence: {det.confidence:.2f})" for det in valid_detections]
+    
+    # Create figure and axis with controlled size
+    import matplotlib.pyplot as plt
+    import matplotlib.patches as patches
+    
+    # Resize image for display if too large
+    max_size = 600  # Reduced maximum size
+    aspect_ratio = w / h
+    if w > max_size or h > max_size:
+        if aspect_ratio > 1:
+            new_size = (max_size, int(max_size / aspect_ratio))
+        else:
+            new_size = (int(max_size * aspect_ratio), max_size)
+        display_image = image.resize(new_size, Image.Resampling.LANCZOS)
+    else:
+        display_image = image
+        new_size = (w, h)
+    
+    # Create figure
+    fig, ax = plt.subplots(figsize=(8, 8))
+    ax.imshow(display_image)
+    
+    # Scale factor for bounding boxes
+    scale_x = new_size[0] / w
+    scale_y = new_size[1] / h
+    
+    # Draw rectangles with different colors
+    colors = plt.cm.rainbow(np.linspace(0, 1, len(valid_detections)))
+    for det, color in zip(valid_detections, colors):
+        x1, y1, x2, y2 = det.bbox
+        # Scale coordinates
+        x1, x2 = x1 * scale_x, x2 * scale_x
+        y1, y2 = y1 * scale_y, y2 * scale_y
+        
+        rect = patches.Rectangle(
+            (x1, y1), x2-x1, y2-y1,
+            linewidth=2,
+            edgecolor=color,
+            facecolor='none'
+        )
+        ax.add_patch(rect)
+        
+        # Add label above the box
+        plt.text(x1, y1-5, det.class_name, color=color, fontsize=10,
+                bbox=dict(facecolor='white', alpha=0.7, edgecolor='none'))
+    
+    # Remove axes and set tight layout
+    ax.axis('off')
+    plt.tight_layout()
+    
+    # Create two columns
+    col1, col2 = st.columns([2, 1])
+    
+    with col1:
+        st.pyplot(fig)
+    
+    with col2:
+        st.markdown("### 🎯 Select Region")
+        selected_idx = st.radio(
+            "Choose a region to search for:",
+            options,
+            help="Select a specific region or use the whole image"
+        )
+        
+        if selected_idx != "Whole Image":
+            # Find the selected detection
+            selected_detection = valid_detections[options.index(selected_idx) - 1]
+            # Show the selected region in original scale (without padding for display)
+            region = crop_image(image, selected_detection.bbox, preserve_aspect_ratio=False)
+            st.markdown("### Selected Region")
+            st.image(region, use_container_width=True)
+            return selected_detection.bbox
+    
+    return None
 
 def main():
     st.title(config['app']['title'])
@@ -196,14 +309,53 @@ def main():
             # Load and display input image
             image = load_and_process_image(uploaded_file)
             
-            # Display input image
+            # Display input image with controlled size
             st.markdown("### 📤 Input Image")
-            st.image(image, use_container_width=True)
+            
+            # Optional region selection
+            use_detection = st.checkbox("Detect and select regions of interest", value=False,
+                                      help="Enable to detect and select specific regions in the image")
+            
+            # Create placeholder for image display
+            image_container = st.empty()
+            
+            # Resize image for display if too large
+            w, h = image.size
+            max_size = 600
+            if w > max_size or h > max_size:
+                aspect_ratio = w / h
+                if aspect_ratio > 1:
+                    new_size = (max_size, int(max_size / aspect_ratio))
+                else:
+                    new_size = (int(max_size * aspect_ratio), max_size)
+                display_image = image.resize(new_size, Image.Resampling.LANCZOS)
+            else:
+                display_image = image
+            
+            selected_region = None
+            if use_detection:
+                # Clear the image container before showing detections
+                image_container.empty()
+                selected_region = display_image_with_detections(image, detector)
+            else:
+                # Center the image using columns within the container
+                with image_container:
+                    col1, col2, col3 = st.columns([1, 2, 1])
+                    with col2:
+                        st.image(display_image, use_container_width=True)
             
             # Process image and search
             with st.spinner('🔍 Finding similar products...'):
-                # Process image and get features for all regions
-                all_features, detections = process_regions(image, preprocessor, feature_extractor, detector)
+                # Extract features based on selection
+                if selected_region:
+                    # Crop and process selected region (with padding for feature extraction)
+                    region = crop_image(image, selected_region, preserve_aspect_ratio=True)
+                    image_tensor = preprocessor.preprocess(region).unsqueeze(0)
+                else:
+                    # Process full image
+                    image_tensor = preprocessor.preprocess(image).unsqueeze(0)
+                
+                image_features = feature_extractor.extract_features(image_tensor)
                 
                 # Display search mode
                 search_mode = (
@@ -218,12 +370,8 @@ def main():
                 # Handle text features (either from user query or auto-tagging)
                 text_features = None
                 if use_auto_tagging and not text_query:
-                    auto_text_query, query_embedding = feature_extractor.generate_text_query(
-                        preprocessor.preprocess(image).unsqueeze(0)
-                    )
-                    tags, scores = feature_extractor.get_image_tags(
-                        preprocessor.preprocess(image).unsqueeze(0)
-                    )
+                    auto_text_query, query_embedding = feature_extractor.generate_text_query(image_tensor)
+                    tags, scores = feature_extractor.get_image_tags(image_tensor)
                     
                     # Display detected tags with confidence scores
                     if tags:  # Only show tags section if we have non-zero confidence tags
@@ -244,51 +392,24 @@ def main():
                 
                 # Search similar items
                 if text_features is not None:
-                    # For each region, compute combined similarity with text
-                    region_scores = []
-                    for i, (features, detection) in enumerate(zip(all_features, detections)):
-                        region_features = features.unsqueeze(0)
-                        
-                        # Apply region-specific weighting
-                        region_visual_weight = visual_weight
-                        if detection['is_full_image']:
-                            # Give slightly more weight to full image in hybrid search
-                            region_visual_weight = min(1.0, visual_weight * 1.2)
-                        
-                        distances, indices = searcher.search(
-                            region_features,
-                            k=50,
-                            text_features=text_features,
-                            visual_weight=region_visual_weight,
-                            merge_strategy=merge_strategy
-                        )
-                        region_scores.append((distances[0], indices[0], detection))
-                    
-                    # Combine scores from all regions with detection confidence
-                    combined_scores = defaultdict(float)
-                    for distances, indices, detection in region_scores:
-                        confidence_weight = 1.0 if detection['is_full_image'] else detection['confidence']
-                        for d, idx in zip(distances, indices):
-                            # Weight the score by detection confidence
-                            weighted_score = d * confidence_weight
-                            combined_scores[idx] = max(combined_scores[idx], weighted_score)
+                    # Hybrid search with visual and text features
+                    distances, indices = searcher.search(
+                        image_features,
+                        k=50,
+                        text_features=text_features,
+                        visual_weight=visual_weight,
+                        merge_strategy=merge_strategy
+                    )
                 else:
-                    # Pure visual search using all regions
-                    all_scores = []
-                    for i, (features, detection) in enumerate(zip(all_features, detections)):
-                        region_features = features.unsqueeze(0)
-                        distances, indices = searcher.search(region_features, k=50)
-                        
-                        # Weight scores by detection confidence
-                        confidence_weight = 1.0 if detection['is_full_image'] else detection['confidence']
-                        weighted_distances = distances[0] * confidence_weight
-                        all_scores.append((weighted_distances, indices[0], detection))
-                    
-                    # Combine results (take best score for each result)
-                    combined_scores = defaultdict(float)
-                    for distances, indices, _ in all_scores:
-                        for d, idx in zip(distances, indices):
-                            combined_scores[idx] = max(combined_scores[idx], d)
+                    # Pure visual search
+                    distances, indices = searcher.search(image_features, k=50)
+                
+                # Process and display results
+                processed_results = process_search_results(distances, indices, searcher)
+                
+                # Display results
+                st.markdown("### 🛍️ Similar Products")
+                display_results(processed_results, num_results)
         
         else:  # Pure text search
             with st.spinner('🔍 Finding similar products...'):
@@ -305,22 +426,12 @@ def main():
                     text_features=None  # No need for hybrid search
                 )
                 
-                # Convert to combined scores format for consistency
-                combined_scores = {
-                    idx: score for idx, score in zip(indices[0], distances[0])
-                }
-        
-        # Convert to sorted lists
-        sorted_items = sorted(combined_scores.items(), key=lambda x: x[1], reverse=True)
-        indices = np.array([[idx for idx, _ in sorted_items[:50]]])
-        distances = np.array([[score for _, score in sorted_items[:50]]])
-        
-        # Get metadata for results
-        results = list(zip(searcher.get_metadata(indices), distances[0]))
-        
-        # Display results
-        st.markdown("### 🛍️ Similar Products")
-        display_results(results, num_results)
+                # Process and display results
+                processed_results = process_search_results(distances, indices, searcher)
+                
+                # Display results
+                st.markdown("### 🛍️ Similar Products")
+                display_results(processed_results, num_results)
 
 if __name__ == "__main__":
     main() 
