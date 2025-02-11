@@ -127,8 +127,8 @@ def build_and_save_index(
                 searcher.add_items(all_features, items_list)
 
             i += 1
-            if i > 10:
-                break
+            # if i > 10:
+            #     break
     else:
         # Process images in batches without detection
         print("Processing images in batches (without detection)...")

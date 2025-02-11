@@ -1,66 +1,107 @@
-# Visual Product Search
+# Visual Product Search 🔍
 
-A Proof-of-Concept (PoC) for a visual product search system that allows users to find similar products using image-based search.
+A hybrid visual-semantic search system that combines CLIP embeddings with object detection for precise product similarity matching.
 
-## Features
+![System Overview](https://via.placeholder.com/800x400.png?text=Visual+Search+Workflow)
 
-- Image-based product search using CLIP embeddings
-- Fast similarity search with FAISS
-- Simple and intuitive Streamlit web interface
-- Modular architecture ready for future extensions (e.g., object detection)
+## Table of Contents
 
-## Project Structure
+- [Key Features](#key-features)
+- [Tech Stack](#tech-stack)
+- [Project Structure](#project-structure)
+- [Setup & Installation](#setup-and-installation)
+- [Usage Guide](#usage-guide)
+- [Detailed Description](#detailed-description)
+- [Potential Improvements](#potential-improvements)
 
-```
+## Key Features 
+- **Visual Feature Extraction** - Extract visual embeddings from full images and detected regions
+- **Embeddings Search Strategy** - Use cosine similarity for embeddings search 
+- **Results Filtering**  
+  - Region size filtering (<10% area)
+  - Human element exclusion
+- **Search refinement using text embeddings**  
+  - User's text query if provided
+  - Zero-shot image tagging and query generation using 
+  - Embeddings fusion or Score-based merging of visual and textual embeddings
+- **Interactive UI** - Region proposals & parameters tuning
+
+## Tech Stack 
+| Component              | Technology                          |
+|------------------------|-------------------------------------|
+| **Feature Extraction** | OpenAI CLIP (ViT-B/32)             |
+| **Object Detection**   | YOLOv8 (Open Images fine-tuned)     |
+| **Similarity Search**  | FAISS (HNSW/IVF/Flat indices)      |
+
+
+## Project Structure 
+```bash
 visual_product_search/
-├── src/                    # Source code
-│   ├── feature_extraction/ # Feature extraction using CLIP
-│   ├── search/            # FAISS similarity search
-│   ├── preprocessing/     # Image preprocessing
-│   ├── utils/            # Utility functions
-│   └── app/              # Streamlit web application
-├── config/               # Configuration files
-└── data/                # Data directory
-    └── index/          # FAISS index storage
+├── data/
+│   ├── images/           # Product image database
+│   └── index/            # FAISS indices & metadata
+├── src/
+│   ├── app/              # Streamlit UI & controllers
+│   ├── feature_extraction/ # CLIP embedding management
+│   ├── search/           # FAISS index handlers
+│   ├── preprocessing/    # Image transforms & detection
+│   └── config/           # Model parameters & categories
+│   └── scripts/          # Build index 
 ```
 
-## Setup
+## Setup & Installation 
 
-1. Create a virtual environment:
+1. **Clone repository**
 ```bash
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+git clone https://github.com/te1ord/VPS.git
+cd VPS
 ```
 
-2. Install dependencies:
+2. **Install dependencies**
 ```bash
+conda create -n vps python=3.10
+conda activate vps
 pip install -r requirements.txt
 ```
 
-3. Run the application:
+4. **Build FAISS index**
+Put your images in `data/images` folder and run script to build index.
+```bash
+python src/scripts/build_index.py --data-dir data/images --output-dir data/index
+```
+Also you can rebuiid inndex from Flat to HNSW/IVF using 'rebuild_index.py' script.
+```bash
+# Convert to IVF
+python src/scripts/rebuild_index.py \
+  --input-index data/index/product_index.faiss \
+  --output-index data/index/product_index_ivf.faiss \
+  --index-type IVF
+
+# Convert to HNSW
+python src/scripts/rebuild_index.py \
+  --input-index data/index/product_index.faiss \
+  --output-index data/index/product_index_hnsw.faiss \
+  --index-type HNSW
+```
+
+5. **Launch application**
 ```bash
 streamlit run src/app/streamlit_app.py
 ```
 
-## Usage
+## Usage Guide 
 
-1. Upload an image through the web interface
-2. The system will:
-   - Preprocess the image
-   - Extract features using CLIP
-   - Find similar products using FAISS
-   - Display results ranked by similarity
+1. **Basic Search**
+   - Upload product image
+   - Optional: Add text query
+   - Adjust visual/text weighting (50/50 by default)
 
-## Technical Details
+2. **Advanced Features**
+   - Enable **Region Detection** to focus on specific product parts
+   - Use **Auto-Tagging** for zero-shot query generation 
+   - Choose index type (HNSW/IVF/Flat) in settings
+   - Toggle between score merging strategies
 
-- Feature Extraction: OpenAI's CLIP model
-- Similarity Search: Facebook AI Similarity Search (FAISS)
-- Frontend: Streamlit
-- Image Processing: PyTorch and torchvision
+## Detailed Description
 
-## Future Improvements
-
-- Add object detection for better product localization
-- Implement image augmentation for better robustness
-- Add support for multiple similarity metrics
-- Optimize index for larger datasets 
+## Potential Improvements

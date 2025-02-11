@@ -5,10 +5,10 @@ __pycache__
 # data
 data/evaluation/*
 data/images/*
-data/index/*
+# data/index/*
 !data/evaluation/.gitkeep
 !data/images/.gitkeep
-!data/index/.gitkeep
+# !data/index/.gitkeep
 
 # tmp
 notebooks/
@@ -18,3 +18,4 @@ src/preprocessing/object_detector.py
 data/baseline/
 data/detection/
 data/index_w_det/
+archive/

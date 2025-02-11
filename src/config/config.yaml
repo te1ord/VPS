@@ -1,6 +1,6 @@
 model:
   clip_model: "ViT-B/32"
-  device: "mps" #"cuda" # or "cpu"
+  device: "cpu" #"cuda" # "mps"
 
 preprocessing:
   image_size: [224, 224]
