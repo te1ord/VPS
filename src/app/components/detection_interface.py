@@ -45,12 +45,6 @@ def display_image_with_detections(image: Image.Image, detector: ObjectDetector) 
         cross_class_suppression=True
     )
     
-    if not valid_detections:
-        return None
-    
-    # Create options list
-    options = ["Whole Image"] + [f"{det.class_name} (Confidence: {det.confidence:.2f})" for det in valid_detections]
-    
     # Create figure and axis with controlled size
     # Resize image for display if too large
     max_size = 600
@@ -65,7 +59,18 @@ def display_image_with_detections(image: Image.Image, detector: ObjectDetector) 
         display_image = image
         new_size = (w, h)
     
-    # Create figure
+    # Create two columns for layout
+    col1, col2 = st.columns([2, 1])
+    
+    if not valid_detections:
+        # If no valid detections, show original image and message
+        with col1:
+            st.image(display_image, use_container_width=True)
+        with col2:
+            st.warning("No confident regions detected. Using the whole image for search.")
+        return None
+    
+    # Create figure for displaying detections
     fig, ax = plt.subplots(figsize=(8, 8))
     ax.imshow(display_image)
     
@@ -97,8 +102,8 @@ def display_image_with_detections(image: Image.Image, detector: ObjectDetector) 
     ax.axis('off')
     plt.tight_layout()
     
-    # Create two columns
-    col1, col2 = st.columns([2, 1])
+    # Create options list
+    options = ["Whole Image"] + [f"{det.class_name} (Confidence: {det.confidence:.2f})" for det in valid_detections]
     
     with col1:
         st.pyplot(fig)

@@ -1,71 +1,13 @@
 # Comprehensive zero-shot image tagging categories for visual product search
-product_attributes:  
-  - chocolate bar
-  - milka
-  - white car
-  # # Core Clothing Categories
+product_attributes:
+  # Core Clothing Categories
   - dress
-  # Popular Dress Brands
-  - H&M
-  - Zara
-  - Forever 21
-  - ASOS
-  - Reformation
-  - Free People
   - t-shirt
-  # Popular T-Shirt Brands
-  - Nike
-  - Adidas
-  - Under Armour
-  - Champion
-  - Supreme
-  - Uniqlo
   - jeans
-  # Popular Jeans Brands
-  - Levis
-  - Wrangler
-  - Diesel
-  - True Religion
-  - G Star Raw
-  - Seven For All Mankind
   - shoes
-  # Popular Shoe Types
-  - running shoes
-  - dress shoes
-  - casual shoes
-  - sandals
-  - slippers
-  # Popular Shoe Brands
-  - Nike
-  - Adidas
-  - New Balance
-  - Asics
-  - Brooks
-  - Hoka
   - sneakers
-  # Popular Sneaker Brands
-  - Nike Air Jordan
-  - Nike Air Force
-  - Adidas Ultraboost
-  - Yeezy
-  - Converse
-  - Vans
   - boots
-  # Popular Boot Brands
-  - Timberland
-  - Dr Martens
-  - UGG
-  - Red Wing
-  - Hunter
-  - Blundstone
   - jacket
-  # Popular Jacket Brands
-  - The North Face
-  - Patagonia
-  - Columbia
-  - Canada Goose
-  - Moncler
-  - Arc'teryx
   - coat
   - sweater
   - skirt
@@ -77,7 +19,7 @@ product_attributes:
   - activewear
   - loungewear
   - suits
-  - traditional_wear
+  - traditional wear
 
   # Fashion Attributes
   - formal
@@ -90,22 +32,6 @@ product_attributes:
   - streetwear
   - minimalist
   - oversized
-  - formal wear
-  # Popular Formal Brands
-  - Hugo Boss
-  - Brooks Brothers
-  - Calvin Klein
-  - Ralph Lauren
-  - Tom Ford
-  - Armani
-  - casual wear
-  # Popular Casual Brands
-  - Gap
-  - Old Navy
-  - American Eagle
-  - Hollister
-  - Abercrombie
-  - Urban Outfitters
 
   # Color Spectrum
   - black
@@ -145,10 +71,10 @@ product_attributes:
   - plain
   - patterned
   - checkered
-  - animal_print
+  - animal print
   - geometric
   - camo
-  - polka_dot
+  - polka dot
   - tie-dye
 
   # Lifestyle Segments
@@ -187,53 +113,18 @@ product_attributes:
 
   # Electronics Ecosystem
   - smartphones
-  # Popular Smartphone Brands
-  - iPhone
-  - Samsung Galaxy
-  - Google Pixel
-  - OnePlus
-  - Xiaomi
-  - Huawei
   - laptops
-  # Popular Laptop Brands
-  - MacBook
-  - Dell XPS
-  - HP Spectre
-  - Lenovo ThinkPad
-  - ASUS ROG
-  - Acer Predator
   - tablets
-  # Popular Tablet Brands
-  - iPad
-  - Samsung Galaxy Tab
-  - Microsoft Surface
-  - Amazon Fire
-  - Lenovo Tab
-  - Huawei MatePad
   - wearables
-  - audio_devices
+  - audio devices
   - cameras
-  - gaming_consoles
-  - smart_home
+  - gaming consoles
+  - smart home
   - drones
-  - vr_headsets
+  - vr headsets
 
   # Home & Living
   - furniture
-  # Popular Furniture Categories
-  - sofa
-  - bed
-  - dining table
-  - office desk
-  - bookshelf
-  - armchair
-  # Popular Furniture Brands
-  - IKEA
-  - Ashley Furniture
-  - West Elm
-  - Pottery Barn
-  - Crate & Barrel
-  - Wayfair
   - bedding
   - bath
   - kitchenware
@@ -246,55 +137,16 @@ product_attributes:
 
   # Health & Beauty
   - skincare
-  # Popular Skincare Brands
-  - Cetaphil
-  - CeraVe
-  - La Roche Posay
-  - The Ordinary
-  - Drunk Elephant
-  - SK II
   - makeup
-  # Popular Makeup Brands
-  - MAC
-  - Fenty Beauty
-  - NARS
-  - Charlotte Tilbury
-  - Urban Decay
-  - Too Faced
   - haircare
   - fragrances
   - supplements
   - fitness equipment
-  # Popular Equipment Types
-  - treadmill
-  - exercise bike
-  - dumbbells
-  - yoga mat
-  - resistance bands
-  # Popular Fitness Brands
-  - Peloton
-  - NordicTrack
-  - Bowflex
-  - Nautilus
-  - Precor
-  - Life Fitness
   - medical devices
   - wellness accessories
 
   # Specialty Categories
   - books
-  # Popular Book Categories
-  - fiction
-  - non fiction
-  - textbooks
-  - childrens books
-  - cookbooks
-  # Popular Book Publishers
-  - Penguin Random House
-  - HarperCollins
-  - Simon & Schuster
-  - Macmillan
-  - Hachette
   - stationery
   - art supplies
   - musical instruments
@@ -303,7 +155,7 @@ product_attributes:
   - pet supplies
   - collectibles
   - luxury goods
-  - eco_friendly
+  - eco friendly
 
   # Amazon Top-Level Categories
   - Beauty and personal care
@@ -313,7 +165,6 @@ product_attributes:
   - Automotive
   - Home and kitchen
   - Books
-  - Pet supplies
   - Toys and games
   - Baby
   - Sports and Outdoors
@@ -325,50 +176,380 @@ product_attributes:
   - Digital media
   - Industrial scientific
 
-  # # Visual Noise Candidates
-  # - packaging
-  # - text overlay
-  # - human models
-  # - product labels
-  # - price tags
-  # - background_elements
-  # - multiple_items
-  # - reflective_surfaces
+ 
 
-  # Pet Supplies
-  - pet food
-  # Popular Pet Food Brands
-  - Royal Canin
-  - Purina
-  - Hills Science Diet
-  - Blue Buffalo
-  - Iams
-  - Pedigree
-  - pet accessories
-  # Popular Pet Accessories
-  - pet bed
-  - pet carrier
-  - pet toys
-  - pet collar
-  - pet leash
-  # Popular Pet Accessory Brands
-  - Kong
-  - Petmate
-  - Ruffwear
-  - Chewy
+# with brands exampels
+# # Comprehensive zero-shot image tagging categories for visual product search
+# product_attributes:  
+#   - chocolate bar
+#   - milka
+#   - white car
+#   # # Core Clothing Categories
+#   - dress
+#   # Popular Dress Brands
+#   - H&M
+#   - Zara
+#   - Forever 21
+#   - ASOS
+#   - Reformation
+#   - Free People
+#   - t-shirt
+#   # Popular T-Shirt Brands
+#   - Nike
+#   - Adidas
+#   - Under Armour
+#   - Champion
+#   - Supreme
+#   - Uniqlo
+#   - jeans
+#   # Popular Jeans Brands
+#   - Levis
+#   - Wrangler
+#   - Diesel
+#   - True Religion
+#   - G Star Raw
+#   - Seven For All Mankind
+#   - shoes
+#   # Popular Shoe Types
+#   - running shoes
+#   - dress shoes
+#   - casual shoes
+#   - sandals
+#   - slippers
+#   # Popular Shoe Brands
+#   - Nike
+#   - Adidas
+#   - New Balance
+#   - Asics
+#   - Brooks
+#   - Hoka
+#   - sneakers
+#   # Popular Sneaker Brands
+#   - Nike Air Jordan
+#   - Nike Air Force
+#   - Adidas Ultraboost
+#   - Yeezy
+#   - Converse
+#   - Vans
+#   - boots
+#   # Popular Boot Brands
+#   - Timberland
+#   - Dr Martens
+#   - UGG
+#   - Red Wing
+#   - Hunter
+#   - Blundstone
+#   - jacket
+#   # Popular Jacket Brands
+#   - The North Face
+#   - Patagonia
+#   - Columbia
+#   - Canada Goose
+#   - Moncler
+#   - Arc'teryx
+#   - coat
+#   - sweater
+#   - skirt
+#   - pants
+#   - shorts
+#   - hoodie
+#   - swimwear
+#   - lingerie
+#   - activewear
+#   - loungewear
+#   - suits
+#   - traditional_wear
 
-  # Toys & Games
-  - toys
-  # Popular Toy Categories
-  - action figures
-  - building blocks
-  - board games
-  - educational toys
-  - outdoor toys
-  # Popular Toy Brands
-  - LEGO
-  - Hasbro
-  - Mattel
-  - Fisher Price
-  - Playmobil
-  - Melissa & Doug
+#   # Fashion Attributes
+#   - formal
+#   - casual
+#   - sporty
+#   - elegant
+#   - vintage
+#   - modern
+#   - bohemian
+#   - streetwear
+#   - minimalist
+#   - oversized
+#   - formal wear
+#   # Popular Formal Brands
+#   - Hugo Boss
+#   - Brooks Brothers
+#   - Calvin Klein
+#   - Ralph Lauren
+#   - Tom Ford
+#   - Armani
+#   - casual wear
+#   # Popular Casual Brands
+#   - Gap
+#   - Old Navy
+#   - American Eagle
+#   - Hollister
+#   - Abercrombie
+#   - Urban Outfitters
+
+#   # Color Spectrum
+#   - black
+#   - white
+#   - red
+#   - blue
+#   - green
+#   - yellow
+#   - pink
+#   - purple
+#   - orange
+#   - gray
+#   - brown
+#   - metallic
+#   - neon
+#   - pastel
+
+#   # Materials & Textures
+#   - leather
+#   - cotton
+#   - denim
+#   - silk
+#   - wool
+#   - synthetic
+#   - linen
+#   - cashmere
+#   - velvet
+#   - fleece
+#   - mesh
+#   - spandex
+#   - bamboo
+#   - recycled materials
+
+#   # Patterns & Designs
+#   - floral
+#   - striped
+#   - plain
+#   - patterned
+#   - checkered
+#   - animal_print
+#   - geometric
+#   - camo
+#   - polka_dot
+#   - tie-dye
+
+#   # Lifestyle Segments
+#   - summer
+#   - winter
+#   - spring
+#   - autumn
+#   - men's
+#   - women's
+#   - unisex
+#   - kids
+#   - baby
+#   - pet
+
+#   # Accessories & Jewelry
+#   - bag
+#   - watch
+#   - jewelry
+#   - sunglasses
+#   - hat
+#   - scarf
+#   - belt
+#   - wallet
+#   - tech accessories
+#   - hair accessories
+
+#   # Activity Contexts
+#   - athletic
+#   - business
+#   - party
+#   - everyday
+#   - travel
+#   - outdoor
+#   - wedding
+#   - swim
+
+#   # Electronics Ecosystem
+#   - smartphones
+#   # Popular Smartphone Brands
+#   - iPhone
+#   - Samsung Galaxy
+#   - Google Pixel
+#   - OnePlus
+#   - Xiaomi
+#   - Huawei
+#   - laptops
+#   # Popular Laptop Brands
+#   - MacBook
+#   - Dell XPS
+#   - HP Spectre
+#   - Lenovo ThinkPad
+#   - ASUS ROG
+#   - Acer Predator
+#   - tablets
+#   # Popular Tablet Brands
+#   - iPad
+#   - Samsung Galaxy Tab
+#   - Microsoft Surface
+#   - Amazon Fire
+#   - Lenovo Tab
+#   - Huawei MatePad
+#   - wearables
+#   - audio_devices
+#   - cameras
+#   - gaming_consoles
+#   - smart_home
+#   - drones
+#   - vr_headsets
+
+#   # Home & Living
+#   - furniture
+#   # Popular Furniture Categories
+#   - sofa
+#   - bed
+#   - dining table
+#   - office desk
+#   - bookshelf
+#   - armchair
+#   # Popular Furniture Brands
+#   - IKEA
+#   - Ashley Furniture
+#   - West Elm
+#   - Pottery Barn
+#   - Crate & Barrel
+#   - Wayfair
+#   - bedding
+#   - bath
+#   - kitchenware
+#   - appliances
+#   - decor
+#   - lighting
+#   - storage
+#   - garden
+#   - diy tools
+
+#   # Health & Beauty
+#   - skincare
+#   # Popular Skincare Brands
+#   - Cetaphil
+#   - CeraVe
+#   - La Roche Posay
+#   - The Ordinary
+#   - Drunk Elephant
+#   - SK II
+#   - makeup
+#   # Popular Makeup Brands
+#   - MAC
+#   - Fenty Beauty
+#   - NARS
+#   - Charlotte Tilbury
+#   - Urban Decay
+#   - Too Faced
+#   - haircare
+#   - fragrances
+#   - supplements
+#   - fitness equipment
+#   # Popular Equipment Types
+#   - treadmill
+#   - exercise bike
+#   - dumbbells
+#   - yoga mat
+#   - resistance bands
+#   # Popular Fitness Brands
+#   - Peloton
+#   - NordicTrack
+#   - Bowflex
+#   - Nautilus
+#   - Precor
+#   - Life Fitness
+#   - medical devices
+#   - wellness accessories
+
+#   # Specialty Categories
+#   - books
+#   # Popular Book Categories
+#   - fiction
+#   - non fiction
+#   - textbooks
+#   - childrens books
+#   - cookbooks
+#   # Popular Book Publishers
+#   - Penguin Random House
+#   - HarperCollins
+#   - Simon & Schuster
+#   - Macmillan
+#   - Hachette
+#   - stationery
+#   - art supplies
+#   - musical instruments
+#   - automotive parts
+#   - baby gear
+#   - pet supplies
+#   - collectibles
+#   - luxury goods
+#   - eco_friendly
+
+#   # Amazon Top-Level Categories
+#   - Beauty and personal care
+#   - Electronics
+#   - Jewelry
+#   - Appliances
+#   - Automotive
+#   - Home and kitchen
+#   - Books
+#   - Pet supplies
+#   - Toys and games
+#   - Baby
+#   - Sports and Outdoors
+#   - Grocery and gourmet food
+#   - Health, household & baby care
+#   - Tools and home improvement
+#   - Arts, crafts and sewing
+#   - Office products
+#   - Digital media
+#   - Industrial scientific
+
+#   # # Visual Noise Candidates
+#   # - packaging
+#   # - text overlay
+#   # - human models
+#   # - product labels
+#   # - price tags
+#   # - background_elements
+#   # - multiple_items
+#   # - reflective_surfaces
+
+#   # Pet Supplies
+#   - pet food
+#   # Popular Pet Food Brands
+#   - Royal Canin
+#   - Purina
+#   - Hills Science Diet
+#   - Blue Buffalo
+#   - Iams
+#   - Pedigree
+#   - pet accessories
+#   # Popular Pet Accessories
+#   - pet bed
+#   - pet carrier
+#   - pet toys
+#   - pet collar
+#   - pet leash
+#   # Popular Pet Accessory Brands
+#   - Kong
+#   - Petmate
+#   - Ruffwear
+#   - Chewy
+
+#   # Toys & Games
+#   - toys
+#   # Popular Toy Categories
+#   - action figures
+#   - building blocks
+#   - board games
+#   - educational toys
+#   - outdoor toys
+#   # Popular Toy Brands
+#   - LEGO
+#   - Hasbro
+#   - Mattel
+#   - Fisher Price
+#   - Playmobil
+#   - Melissa & Doug
