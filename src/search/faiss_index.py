@@ -17,7 +17,7 @@ class IndexItem:
     is_full_image: bool  # Whether this is a full image embedding
 
 class FAISSSearcher:
-    def __init__(self, config_path: str = "config/config.yaml"):
+    def __init__(self, config_path: str = "src/config/config.yaml"):
         with open(config_path, 'r') as f:
             config = yaml.safe_load(f)
         
@@ -32,6 +32,24 @@ class FAISSSearcher:
         
         if self.config['index_type'] == 'IndexFlatIP':
             return faiss.IndexFlatIP(dimension)
+        elif self.config['index_type'] == 'HNSW':
+            # HNSW parameters
+            M = self.config.get('hnsw_M', 16)  # Number of connections per layer
+            ef_construction = self.config.get('hnsw_ef_construction', 40)  # Size of dynamic candidate list for construction
+            
+            index = faiss.IndexHNSWFlat(dimension, M, faiss.METRIC_INNER_PRODUCT)
+            index.hnsw.efConstruction = ef_construction
+            index.hnsw.efSearch = self.config.get('hnsw_ef_search', 16)
+            return index
+        elif self.config['index_type'] == 'IVF':
+            # IVF parameters
+            nlist = self.config.get('ivf_nlist', 100)  # Number of clusters/cells
+            nprobe = self.config.get('ivf_nprobe', 10)  # Number of cells to visit during search
+            
+            quantizer = faiss.IndexFlatIP(dimension)
+            index = faiss.IndexIVFFlat(quantizer, dimension, nlist, faiss.METRIC_INNER_PRODUCT)
+            index.nprobe = nprobe
+            return index
         else:
             raise ValueError(f"Unsupported index type: {self.config['index_type']}")
     
@@ -226,18 +244,46 @@ class FAISSSearcher:
             with open(paths_path, 'w') as f:
                 json.dump(self.image_paths, f)
     
-    def load_index(self, path: str):
-        """Load the FAISS index and metadata from disk."""
-        # Load FAISS index
-        self.index = faiss.read_index(path)
+    def load_index(self, path: str, index_type: Optional[str] = None):
+        """
+        Load the FAISS index and metadata from disk.
+        Optionally convert to a different index type.
         
-        # Try to load metadata first
+        Args:
+            path: Path to the index file
+            index_type: Optional new index type to convert to ('HNSW', 'IVF', or None to keep original)
+        """
+        # Load original index
+        original_index = faiss.read_index(path)
+        
+        if index_type is not None and index_type != self.config['index_type']:
+            print(f"Converting index from {self.config['index_type']} to {index_type}")
+            
+            # Extract vectors if the index supports reconstruction
+            if not hasattr(original_index, 'reconstruct'):
+                raise ValueError("Original index doesn't support reconstruction")
+            
+            num_vectors = original_index.ntotal
+            vectors = np.vstack([original_index.reconstruct(i) for i in range(num_vectors)])
+            
+            # Create and train new index
+            self.config['index_type'] = index_type
+            self.index = self._create_index()
+            
+            if isinstance(self.index, faiss.IndexIVFFlat):
+                self.index.train(vectors)
+            
+            # Add vectors to new index
+            self.index.add(vectors)
+        else:
+            self.index = original_index
+        
+        # Load metadata
         metadata_path = Path(path).with_suffix('.json')
         if metadata_path.exists():
             with open(metadata_path, 'r') as f:
                 data = json.load(f)
                 self.metadata = [IndexItem(**item) for item in data]
-                # Update image_paths for backward compatibility
                 self.image_paths = [item.original_image_path for item in self.metadata]
         else:
             # Try legacy image paths
@@ -245,7 +291,6 @@ class FAISSSearcher:
             if paths_path.exists():
                 with open(paths_path, 'r') as f:
                     self.image_paths = json.load(f)
-                    # Create basic metadata for backward compatibility
                     self.metadata = [
                         IndexItem(
                             original_image_path=path,

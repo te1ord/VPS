@@ -108,10 +108,10 @@ def analyze_embeddings(embeddings, output_dir):
         'cluster_metrics': cluster_metrics
     }
 
-def evaluate_embeddings(index_dir="data/index", output_dir="data/evaluation"):
+def evaluate_embeddings(index_dir="data/index", output_dir="logs/evaluation"):
     """Main function to run embedding evaluation."""
     index_path = Path(index_dir) / "product_index.faiss"
-    paths_path = Path(index_dir) / "image_paths.json"
+    paths_path = Path(index_dir) / "product_index.json"
     
     print("Loading embeddings and paths...")
     embeddings, image_paths = load_embeddings_and_paths(index_path, paths_path)

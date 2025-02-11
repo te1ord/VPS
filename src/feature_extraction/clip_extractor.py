@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Union, List, Tuple, Dict
 
 class CLIPExtractor:
-    def __init__(self, config_path: str = "config/config.yaml"):
+    def __init__(self, config_path: str = "src/config/config.yaml"):
         # Load main config
         with open(config_path, 'r') as f:
             config = yaml.safe_load(f)

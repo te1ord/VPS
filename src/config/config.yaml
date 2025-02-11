@@ -10,20 +10,30 @@ preprocessing:
   std: [0.26862954, 0.26130258, 0.27577711]
 
 search:
-  index_type: "IndexFlatIP"  # Inner product similarity
+  index_type: 'IndexFlatIP' #'HNSW' # 'IVF' #"IndexFlatIP"  # Inner product similarity
   dimension: 512  # CLIP ViT-B/32 embedding dimension
   nprobe: 8  # Number of clusters to visit during search
+  
+  hnsw_M: 16  # Number of connections (higher = better accuracy but more memory)
+  hnsw_ef_construction: 40  # Construction-time parameter (higher = better accuracy but slower build)
+  
+  hnsw_ef_search: 16  # Search-time parameter (higher = better accuracy but slower search)
+  ivf_nlist: 100  # Number of clusters (rule of thumb: sqrt(n) where n is dataset size)
+  ivf_nprobe: 10  # Number of clusters to search (higher = better accuracy but slower search)
 
 app:
   title: "Visual Product Search"
   description: "Find similar products using image search"
+  confidence_threshold: 0.1
+  min_region_size: 0.1  # Minimum region size as fraction of image area (5%) for Region Filtering
+  nms_iou_threshold_ui: 0.8  # IoU threshold for user image detections
+  search_k: 50  # Number of results to return
 
 detection:
   model_path: "yolov8n-oiv7.pt"
-  min_region_size: 0.1  # Minimum region size as fraction of image area (5%) for Region Filtering
-  confidence_threshold: 0.1
+  confidence_threshold: 0.5
   nms_iou_threshold: 0.5  # IoU threshold for non-max suppression during training
-  nms_iou_threshold_ui: 0.8  # IoU threshold for user image detections
+  
 
   # Classes to exclude (these will never be included in results)
   exclude_classes: [

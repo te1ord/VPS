@@ -1,0 +1,97 @@
+{
+  "silhouette_score": 0.07319802045822144,
+  "davies_bouldin_score": 3.463856776549592,
+  "selected_clusters": 2,
+  "cluster_metrics": [
+    {
+      "n_clusters": 2,
+      "silhouette": 0.07319802045822144,
+      "davies_bouldin": 3.463856776549592
+    },
+    {
+      "n_clusters": 3,
+      "silhouette": 0.05365458130836487,
+      "davies_bouldin": 3.837797487787302
+    },
+    {
+      "n_clusters": 4,
+      "silhouette": 0.051499053835868835,
+      "davies_bouldin": 4.027017768139798
+    },
+    {
+      "n_clusters": 5,
+      "silhouette": 0.05575638636946678,
+      "davies_bouldin": 3.5977129969673562
+    },
+    {
+      "n_clusters": 6,
+      "silhouette": 0.06437184661626816,
+      "davies_bouldin": 3.4034567443212254
+    },
+    {
+      "n_clusters": 7,
+      "silhouette": 0.034551721066236496,
+      "davies_bouldin": 3.6924587588763735
+    },
+    {
+      "n_clusters": 8,
+      "silhouette": 0.05313641205430031,
+      "davies_bouldin": 3.4289918149121332
+    },
+    {
+      "n_clusters": 9,
+      "silhouette": 0.04769264906644821,
+      "davies_bouldin": 3.7963936594605983
+    },
+    {
+      "n_clusters": 10,
+      "silhouette": 0.05107872560620308,
+      "davies_bouldin": 3.4826621674631157
+    },
+    {
+      "n_clusters": 11,
+      "silhouette": 0.04680274799466133,
+      "davies_bouldin": 3.5119604341445627
+    },
+    {
+      "n_clusters": 12,
+      "silhouette": 0.04950292035937309,
+      "davies_bouldin": 3.4968889367813336
+    },
+    {
+      "n_clusters": 13,
+      "silhouette": 0.04687981307506561,
+      "davies_bouldin": 3.5632811436101837
+    },
+    {
+      "n_clusters": 14,
+      "silhouette": 0.047058191150426865,
+      "davies_bouldin": 3.665908197942008
+    },
+    {
+      "n_clusters": 15,
+      "silhouette": 0.046943847090005875,
+      "davies_bouldin": 3.7074076133081206
+    },
+    {
+      "n_clusters": 16,
+      "silhouette": 0.04321768134832382,
+      "davies_bouldin": 3.6857692762511958
+    },
+    {
+      "n_clusters": 17,
+      "silhouette": 0.047520607709884644,
+      "davies_bouldin": 3.5787388801438627
+    },
+    {
+      "n_clusters": 18,
+      "silhouette": 0.04464956000447273,
+      "davies_bouldin": 3.5681806080870637
+    },
+    {
+      "n_clusters": 19,
+      "silhouette": 0.04553390294313431,
+      "davies_bouldin": 3.531283232219629
+    }
+  ]
+}
