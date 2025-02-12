@@ -26,7 +26,7 @@ app:
   description: "Find similar products using image search"
   confidence_threshold: 0.1
   min_region_size: 0.1  # Minimum region size as fraction of image area (5%) for Region Filtering
-  nms_iou_threshold_ui: 0.8  # IoU threshold for user image detections
+  nms_iou_threshold_ui: 0.6  # IoU threshold for user image detections
   search_k: 50  # Number of results to return
 
 detection:

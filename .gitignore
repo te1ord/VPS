@@ -14,7 +14,6 @@ data/images/*
 notebooks/
 yolov8n-oiv7.pt
 yolov8n.pt
-src/preprocessing/object_detector.py
 data/baseline/
 data/detection/
 data/index_w_det/

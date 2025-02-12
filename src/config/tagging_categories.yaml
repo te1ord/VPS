@@ -1,5 +1,7 @@
 # Comprehensive zero-shot image tagging categories for visual product search
 product_attributes:
+  - chocolate bar
+  - milka
   # Core Clothing Categories
   - dress
   - t-shirt
